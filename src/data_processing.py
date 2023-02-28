@@ -29,7 +29,7 @@ from odc.stac import stac_load
 import planetary_computer as pc
 
 # Please pass your API key here
-pc.settings.set_subscription_key('5f3a374adb2b43fe89373be784ae30c5')
+pc.settings.set_subscription_key('***')
 
 # Others
 import requests
@@ -176,7 +176,7 @@ def compute_rvi_stats(rvi_smooth, harvest):
 def get_all_features(crop_yield_data):
     all_features = []
     debug_stop = 0
-    for ind, row in crop_yield_data.iterrows():
+    for ind, row in tqdm(crop_yield_data.iterrows())h:
         if debug_stop > 2:
             break
         debug_stop+=1
