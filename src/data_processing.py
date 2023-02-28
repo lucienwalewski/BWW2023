@@ -29,7 +29,7 @@ from odc.stac import stac_load
 import planetary_computer as pc
 
 # Please pass your API key here
-pc.settings.set_subscription_key('5f3a374adb2b43fe89373be784ae30c5')
+pc.settings.set_subscription_key('***')
 
 # Others
 import requests
@@ -62,9 +62,9 @@ def access_sentinel_data(longitude,
 
     bands_of_interest = assests
     if season == 'SA':
-        time_slice = "2022-05-01/2022-08-31"
+        time_slice = time_of_interest_SA
     if season == 'WS':
-        time_slice = "2022-01-01/2022-04-30"
+        time_slice = time_of_interest_WS
         
     vv_list = []
     vh_list = []
@@ -124,31 +124,41 @@ def compute_rvi_stats(rvi_smooth, harvest):
 
     local_mins = np.where(rvi_handling['mins']==True)
 
-    start_index = local_mins[0][0]
-    end_index = local_mins[0][-1]
-
-    start_val = rvi_handling[end_index]
-    end_val = rvi_handling[end_index]
-
-    start_date = (rvi_handling.index[end_index] - rvi_handling.index[0]).days
-    end_date = (rvi_handling.index[end_index] - rvi_handling.index[0]).days
-
-    # when not enough local mins... 
-    if end_date < 90:
+    if local_mins[0].shape[0] == 0:
         end_date = 150
         end_index = rvi_handling['mins'].shape[0]-1
         end_val = rvi_handling[end_index]
-    if start_date > 90:
         start_date = 30
         start_index = 0
         start_val = rvi_handling[start_index]
 
+
+    else:
+        start_index = local_mins[0][0]
+        end_index = local_mins[0][-1]
+
+        start_val = rvi_handling[end_index]
+        end_val = rvi_handling[end_index]
+
+        start_date = (rvi_handling.index[end_index] - rvi_handling.index[0]).days
+        end_date = (rvi_handling.index[end_index] - rvi_handling.index[0]).days
+
+        # when not enough local mins... 
+        if end_date < 90:
+            end_date = 150
+            end_index = rvi_handling['mins'].shape[0]-1
+            end_val = rvi_handling[end_index]
+        if start_date > 90:
+            start_date = 30
+            start_index = 0
+            start_val = rvi_handling[start_index]
+            
     max_val = rvi_smooth[start_index:end_index+1].max()
     max_index = rvi_smooth[start_index:end_index+1].idxmax()
     max_date = (max_index - rvi_handling.index[0]).days
 
-    harvest_date = (pd.to_datetime(harvest)- rvi_handling.index[0]).days
-    date_diff = [(pd.to_datetime(harvest)- rvi_handling.index[i]).days for i in range(rvi_smooth.values.shape[0])]
+    harvest_date = (pd.to_datetime(harvest, dayfirst=True)- rvi_handling.index[0]).days
+    date_diff = [(pd.to_datetime(harvest, dayfirst=True)- rvi_handling.index[i]).days for i in range(rvi_smooth.values.shape[0])]
     date_diff = np.array(date_diff)
     goes_neg = np.where(date_diff<=0)[0][0]
     if date_diff[goes_neg] == 0:
@@ -157,9 +167,7 @@ def compute_rvi_stats(rvi_smooth, harvest):
     else:
         days_neg = [(rvi_handling.index[goes_neg-1] - rvi_handling.index[0]).days, 
                     (rvi_handling.index[goes_neg] - rvi_handling.index[0]).days]
-        print(days_neg)
         vals_neg = [rvi_smooth.values[goes_neg-1], rvi_smooth.values[goes_neg]]
-        print(vals_neg)
         m = (vals_neg[1] - vals_neg[0])/(days_neg[1]-days_neg[0])
         
         harvest_val = m*(harvest_date - days_neg[0]) + vals_neg[0]
@@ -176,10 +184,10 @@ def compute_rvi_stats(rvi_smooth, harvest):
 def get_all_features(crop_yield_data):
     all_features = []
     debug_stop = 0
-    for ind, row in crop_yield_data.iterrows():
-        if debug_stop > 2:
-            break
-        debug_stop+=1
+    for ind, row in tqdm(crop_yield_data.iterrows()):
+        #if debug_stop > 2:
+        #    break
+        #debug_stop+=1
         mean_row = access_sentinel_data(row["Longitude"], 
                                         row["Latitude"], 
                                         row["Season(SA = Summer Autumn, WS = Winter Spring)"])
