@@ -29,7 +29,7 @@ from odc.stac import stac_load
 import planetary_computer as pc
 
 # Please pass your API key here
-pc.settings.set_subscription_key('***')
+pc.settings.set_subscription_key('5f3a374adb2b43fe89373be784ae30c5')
 
 # Others
 import requests
@@ -134,13 +134,14 @@ def compute_rvi_stats(rvi_smooth, harvest):
 
 
     else:
+        # following code accounts for only one min 
         start_index = local_mins[0][0]
         end_index = local_mins[0][-1]
 
-        start_val = rvi_handling[end_index]
+        start_val = rvi_handling[start_index]
         end_val = rvi_handling[end_index]
 
-        start_date = (rvi_handling.index[end_index] - rvi_handling.index[0]).days
+        start_date = (rvi_handling.index[start_index] - rvi_handling.index[0]).days
         end_date = (rvi_handling.index[end_index] - rvi_handling.index[0]).days
 
         # when not enough local mins... 
@@ -162,7 +163,7 @@ def compute_rvi_stats(rvi_smooth, harvest):
     date_diff = np.array(date_diff)
     goes_neg = np.where(date_diff<=0)[0][0]
     if date_diff[goes_neg] == 0:
-        harvest_val = rvi_smooth.index[goes_neg]
+        harvest_val = rvi_smooth.values[goes_neg]
 
     else:
         days_neg = [(rvi_handling.index[goes_neg-1] - rvi_handling.index[0]).days, 
@@ -212,6 +213,15 @@ def build_model(X, y):
     r2_outsample = r2_score(y_test,outsample_predictions)
 
     return r2_insample, r2_outsample
+
+
+
+
+
+
+
+
+
 
 
 
