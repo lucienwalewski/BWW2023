@@ -201,10 +201,10 @@ def build_model(X, y):
     # Choose any random state
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=21)
     regressor = ExtraTreesRegressor(bootstrap=False, ccp_alpha=0.0, criterion='mse',
-                    max_depth=None, max_features='auto', max_leaf_nodes=None,
+                    max_depth=10, max_features='auto', max_leaf_nodes=None,
                     max_samples=None, min_impurity_decrease=0.0, min_samples_leaf=1,
                     min_samples_split=2, min_weight_fraction_leaf=0.0,
-                    n_estimators=100, n_jobs=-1, oob_score=False,
+                    n_estimators=50, n_jobs=-1, oob_score=False,
                     random_state=123, verbose=0, warm_start=False)
     regressor.fit(X_train, y_train)
     insample_predictions = regressor.predict(X_train)
@@ -213,15 +213,6 @@ def build_model(X, y):
     r2_outsample = r2_score(y_test,outsample_predictions)
 
     return r2_insample, r2_outsample
-
-
-
-
-
-
-
-
-
 
 
 
