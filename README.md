@@ -30,10 +30,14 @@ Grid Search:
 - 'n_estimators': 100
 
 R2 scores:
-- y_train: 0.84
-- y_test: 0.55 
+- y_train: 0.75-0.84
+- y_test: 0.45-0.55 
 
 Conclusion: overfitting 
 
 - more features ?? 
 - different regression ??
+
+
+
+## RVI PLS Regression 
